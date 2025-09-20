@@ -1,14 +1,13 @@
-import React from 'react';
-import CounterApp from './CounterApp';
-import ColorChangerApp from './ColorChangerApp';
+import React from "react";
+import ChatScreen from "./MidAct/ChatScreen";
+import CommentSection from "./MidAct/CommentSection";
+import CommentSection from "./MidAct/ChatBubble";
 
-const App = () => {
+export default function App() {
   return (
     <>
-      <CounterApp />
-        { <ColorChangerApp />}
-        </>
-    );
-};
-
-export default App;
+      <ChatScreen />
+      <CommentSection />
+    </>
+  );
+}
