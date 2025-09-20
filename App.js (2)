@@ -1,0 +1,161 @@
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+} from "react-native";
+
+// Simple AI reply function (replace with a real AI service for better results)
+const generateAIResponse = (userMessage) => {
+  const responses = [
+    "That's interesting!",
+    "Tell me more.",
+    "I see.",
+    "Okay.",
+    "How does that make you feel?",
+  ];
+
+  // Use a simple hashing to get a consistent response for the same message
+  let hash = 0;
+  for (let i = 0; i < userMessage.length; i++) {
+    hash = (hash << 5) - hash + userMessage.charCodeAt(i);
+    hash |= 0; // Convert to 32bit integer
+  }
+
+  const index = Math.abs(hash) % responses.length;
+  return responses[index];
+};
+
+export default function App() {
+  const [messages, setMessages] = useState([
+    { id: "1", text: "Hi", sender: "Secret" },
+    { id: "2", text: "Mag madre ko", sender: "Jaciel Gandulpos" },
+  ]);
+  const [input, setInput] = useState("");
+
+  const sendMessage = () => {
+    if (input.trim() === "") return;
+    const newMessage = {
+      id: Date.now().toString(),
+      text: input,
+      sender: "Jaciel Gandulpos",
+    };
+    setMessages([...messages, newMessage]);
+    setInput("");
+  };
+
+  const sendBotMessage = useCallback((response) => {
+    const botMessage = {
+      id: Date.now().toString(),
+      text: response,
+      sender: "Secret",
+    };
+    setMessages(prevMessages => [...prevMessages, botMessage]);
+  }, []);
+
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].sender === "Jaciel Gandulpos") {
+      const userMessage = messages[messages.length - 1].text;
+
+      // Simulate a delay for the bot's response
+      setTimeout(() => {
+        const botResponse = generateAIResponse(userMessage);
+        sendBotMessage(botResponse);
+      }, 500); // Simulate response time
+    }
+  }, [messages, sendBotMessage]);
+
+  const renderItem = ({ item }) =>
+    React.createElement(
+      View,
+      {
+        style: [
+          styles.message,
+          item.sender === "Jaciel Gandulpos" ? styles.userMessage : styles.botMessage,
+        ],
+      },
+      [
+        React.createElement(Text, { key: "sender", style: styles.sender }, item.sender + ":"),
+        React.createElement(Text, { key: "text", style: styles.text }, item.text),
+      ]
+    );
+
+  return React.createElement(
+    SafeAreaView,
+    { style: styles.container },
+    [
+      React.createElement(FlatList, {
+        key: "list",
+        data: messages,
+        renderItem: renderItem,
+        keyExtractor: (item) => item.id,
+        style: styles.chat,
+      }),
+      React.createElement(
+        View,
+        { key: "inputRow", style: styles.inputRow },
+        [
+          React.createElement(TextInput, {
+            key: "input",
+            style: styles.input,
+            value: input,
+            onChangeText: setInput,
+            placeholder: "Type a message",
+          }),
+          React.createElement(
+            TouchableOpacity,
+            { key: "button", style: styles.button, onPress: sendMessage },
+            React.createElement(Text, { style: styles.buttonText }, "Send")
+          ),
+        ]
+      ),
+    ]
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor:"white" },
+  chat: { flex: 1, padding: 10 },
+  message: {
+    marginVertical: 5,
+    padding: 10,
+    borderRadius: 10,
+    maxWidth: "80%",
+  },
+  userMessage: {
+    alignSelf: "flex-end",
+    backgroundColor: "#2196f3",
+  },
+  botMessage: {
+    alignSelf: "flex-start",
+    backgroundColor: "#2196f3",
+  },
+  sender: { fontWeight: "bold", color: "#fff" },
+  text: { color: "#fff" },
+  inputRow: {
+    flexDirection: "row",
+    padding: 10,
+    borderTopWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 8,
+  },
+  button: {
+    backgroundColor: "#2196f3",
+    marginLeft: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    justifyContent: "center",
+  },
+  buttonText: { color: "#fff", fontWeight: "bold" },
+});
